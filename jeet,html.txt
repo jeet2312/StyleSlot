@@ -1,0 +1,38 @@
+app = Flask(_name_)
+
+# Dummy data (in place of a database)
+appointments = []
+
+# Define available time slots
+time_slots = [
+    "10:00 AM", "10:30 AM", "11:00 AM",
+    "11:30 AM", "12:00 PM", "2:00 PM",
+    "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM"
+]
+
+@app.route('/')
+def index():
+    booked_slots = [a['time'] for a in appointments]
+    available_slots = [slot for slot in time_slots if slot not in booked_slots]
+    return render_template('index.html', slots=available_slots, appointments=appointments)
+
+@app.route('/book', methods=['POST'])
+def book():
+    name = request.form['name']
+    phone = request.form['phone']
+    time = request.form['time']
+
+    # Simple check to avoid double booking
+    for appt in appointments:
+        if appt['time'] == time:
+            return "Time slot already booked!", 400
+
+    appointments.append({
+        'name': name,
+        'phone': phone,
+        'time': time
+    })
+    return redirect(url_for('index'))
+
+if _name_ == '_main_':
+    app.run(debug=True)
